@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<addon scheme="3.0">
+    <id>rus_komtet_kassa</id>
+    <name>KOMTET Kassa</name>
+    <version>1.0</version>
+    <priority>1001</priority>
+    <status>active</status>
+    <default_language>en</default_language>
+    
+    <compatibility>
+        <core_version>
+            <min>4.3.9</min>
+        </core_version>
+        <!-- <dependencies>rus_taxes</dependencies> -->
+    </compatibility>
+
+    <settings>
+        <sections>
+            <section id="general">
+                <items>
+                    <item id="statuses_paid">
+                        <type>multiple select</type>
+                    </item>
+                    <item id="statuses_refund">
+                        <type>multiple select</type>
+                    </item>
+                    <item id="default_sno">
+                        <type>selectbox</type>
+                    </item>
+                    <item id="default_vat">
+                        <type>selectbox</type>
+                    </item>
+                    <item id="payment_systems">
+                        <type>multiple select</type>
+                    </item>
+                    <item id="is_print_check">
+                        <type>selectbox</type>
+                    </item>
+                    <item id="shop_id">
+                        <type>text</type>
+                    </item>
+                    <item id="shop_secret">
+                        <type>text</type>
+                    </item>
+                    <item id="queue_id">
+                        <type>text</type>
+                    </item>
+                </items>
+            </section>
+        </sections>
+    </settings>
+
+    <queries>
+        <item>
+            CREATE TABLE IF NOT EXISTS `?:rus_komtet_kassa_order_fiscalization_status` (
+                `id` int(10) NOT NULL AUTO_INCREMENT,
+                `order_id` int(10) NOT NULL,
+                `status` varchar(25),
+                `description` varchar(25),
+                PRIMARY KEY (`id`)
+            );
+        </item>
+        <item for="uninstall">DROP TABLE IF EXISTS `?:rus_komtet_kassa_order_fiscalization_status`;</item>
+    </queries>
+</addon>

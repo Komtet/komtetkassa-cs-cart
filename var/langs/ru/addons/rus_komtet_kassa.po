@@ -1,0 +1,69 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: cs-cart-ru\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language-Team: Russian\n"
+"Language: ru_RU\n"
+"Plural-Forms: nplurals=4; plural=((n%10==1 && n%100!=11) ? 0 : ((n%10 >= 2 && n%10 <=4 && (n%100 < 12 || n%100 > 14)) ? 1 : ((n%10 == 0 || (n%10 >= 5 && n%10 <=9)) || (n%100 >= 11 && n%100 <= 14)) ? 2 : 3));\n"
+"X-Generator: crowdin.com\n"
+"X-Crowdin-Project: cs-cart-ru\n"
+"X-Crowdin-Language: ru\n"
+"X-Crowdin-File: /release-4.8.1/addons/rus_komtet_kassa.po\n"
+"Last-Translator: cscart <translations@cs-cart.com>\n"
+"PO-Revision-Date: 2018-06-19T11:57:52+0000\n"
+
+msgctxt "Addons::name::rus_komtet_kassa"
+msgid "KOMTET Kassa"
+msgstr "КОМТЕТ Касса"
+
+msgctxt "Addons::description::rus_komtet_kassa"
+msgid ""
+msgstr "Интеграция с сервисом онлайн-касс КОМТЕТ Касса"
+
+msgctxt "SettingsOptions::rus_komtet_kassa::statuses_paid"
+msgid "Statuses for paid orders"
+msgstr "Статусы оплаченных заказов"
+
+msgctxt "SettingsTooltips::rus_komtet_kassa::statuses_paid"
+msgid "When an order gets one of these statuses, a sales receipt is issued."
+msgstr "Когда заказ получает один из этих статусов, происходит фискализация."
+
+msgctxt "SettingsOptions::rus_komtet_kassa::statuses_refund"
+msgid "Statuses for refunded orders"
+msgstr "Статусы возвращённых заказов"
+
+msgctxt "SettingsTooltips::rus_komtet_kassa::statuses_refund"
+msgid "When an order gets one of these statuses, a return receipt is issued."
+msgstr "Когда заказ получает один из этих статусов, происходит фискализация возврата."
+
+msgctxt "SettingsOptions::rus_komtet_kassa::default_sno"
+msgid "Taxation system"
+msgstr "Система налогообложения по умолчанию"
+
+msgctxt "SettingsOptions::rus_komtet_kassa::default_vat"
+msgid "Default taxation system"
+msgstr "Налоговая ставка по умолчанию"
+
+msgctxt "SettingsOptions::rus_komtet_kassa::default_vat"
+msgid "Default VAT"
+msgstr "Налоговая ставка по умолчанию"
+
+msgctxt "SettingsOptions::rus_komtet_kassa::payment_systems"
+msgid "Payment systems for fiscalization"
+msgstr "Способы оплаты, для которых производить фискализацию"
+
+msgctxt "SettingsOptions::rus_komtet_kassa::is_print_check"
+msgid "Is check printing needed"
+msgstr "Печатать ли бумажный чек"
+
+msgctxt "SettingsOptions::rus_komtet_kassa::shop_id"
+msgid "ShopId"
+msgstr "ShopId Магазина"
+
+msgctxt "SettingsOptions::rus_komtet_kassa::shop_secret"
+msgid "Shop Secret"
+msgstr "Secret Магазина"
+
+msgctxt "SettingsOptions::rus_komtet_kassa::queue_id"
+msgid "Queue ID"
+msgstr "ID Очереди"
