@@ -42,9 +42,9 @@ class komtetHelper
 		foreach( $positions as $position )
 		{
 			$positionObj = new Position($position['product'],
-										floatval($position['extra']['base_price']),
+										floatval($position['price']),
 										floatval($position['amount']),
-										$position['amount']*$position['extra']['base_price'],
+										$position['amount']*$position['price'],
 										floatval($position['discount']),
 										$vat);
 
