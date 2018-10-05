@@ -51,11 +51,11 @@ class komtetHelper
 			$check->addPosition($positionObj);
 		}
 
-		if (floatval($order['shipping_cost']) > 0) {
+		if (floatval($order['display_shipping_cost']) > 0.0) {
 			$shippingPosition = new Position("Доставка",
-											 floatval($order['shipping_cost']),
+											 floatval($order['display_shipping_cost']),
 											 1,
-											 floatval($order['shipping_cost']),
+											 floatval($order['display_shipping_cost']),
 											 0,
 											 $vat);
 			$check->addPosition($shippingPosition);
