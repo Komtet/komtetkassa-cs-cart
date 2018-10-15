@@ -29,37 +29,45 @@ class komtetHelper
 
 		$positions = $order['positions'];
 
-		$payment = Payment::createCard(floatval($order['total']));
-
 		$method = $is_refund ? Check::INTENT_SELL_RETURN : Check::INTENT_SELL;
 
 		$check = new Check($order['order_id'], $order['email'], $method, intval($params['sno']));
 		$check->setShouldPrint($params['is_print_check']);
-		$check->addPayment($payment);
 
 		$vat = new Vat($params['vat']);
 
+		$total = 0.0;
+
 		foreach( $positions as $position )
 		{
+
+			$total += round($position['amount']*$position['price'], 2);
+
 			$positionObj = new Position($position['product'],
-										floatval($position['price']),
+										round($position['price'], 2),
 										floatval($position['amount']),
-										$position['amount']*$position['price'],
+										round($position['amount']*$position['price'], 2),
 										floatval($position['discount']),
 										$vat);
 
 			$check->addPosition($positionObj);
 		}
 
-		if (floatval($order['display_shipping_cost']) > 0.0) {
+		if (round($order['shipping_cost'], 2) > 0.0) {
+
+			$total += round($order['shipping_cost'], 2);
+
 			$shippingPosition = new Position("Доставка",
-											 floatval($order['display_shipping_cost']),
+											 round($order['shipping_cost'], 2),
 											 1,
-											 floatval($order['display_shipping_cost']),
+											 round($order['shipping_cost'], 2),
 											 0,
 											 $vat);
 			$check->addPosition($shippingPosition);
 		}
+
+		$payment = Payment::createCard(round($total, 2));
+		$check->addPayment($payment);
 
 		$client = new Client($params['shop_id'], $params['secret']);
 		$queueManager = new QueueManager($client);

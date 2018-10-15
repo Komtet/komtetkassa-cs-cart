@@ -129,11 +129,6 @@ function fn_rus_komtet_kassa_change_order_status($status_to, $status_from, $orde
                 'statuses_refund' => Registry::get('addons.rus_komtet_kassa.statuses_refund')
             ];
 
-            if (!$params['shop_id'] || !$params['secret'] || !$params['queue_id'] || !$params['sno'] || !$params['vat']) {
-                fn_set_notification('W', fn_get_lang_var('warning'), "Настройки модуля КОМТЕТ Касса не заполнены, фискализация не произошла", true);
-                exit();
-            }
-
             if(in_array($status_to, array_keys($params['statuses_refund']), true)) {
                 komtetHelper::fiscalize($order, $params, true);
             }
