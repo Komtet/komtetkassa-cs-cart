@@ -11,8 +11,30 @@ namespace Komtet\KassaSdk;
 
 class Payment
 {
+    /**
+     * Электронными
+     */
     const TYPE_CARD = 'card';
+
+    /**
+     * Наличными
+     */
     const TYPE_CASH = 'cash';
+
+    /**
+     * Cумма предоплатой (зачет аванса и/или предыдущих платежей)
+     */
+    const TYPE_PREPAYMENT = 'prepayment';
+
+    /**
+     * Cумма постоплатой (кредит)
+     */
+    const TYPE_CREDIT = 'credit';
+
+    /**
+     * Cумма встречным предлжением
+     */
+    const TYPE_COUNTER_PROVISIONING = 'counter_provisioning';
 
     /**
      * @var string
@@ -37,23 +59,11 @@ class Payment
     }
 
     /**
-     * @param int|float $sum Amount
-     *
-     * @return Payment
+     * @return int|float
      */
-    public static function createCard($sum)
+    public function getSum()
     {
-        return new static(static::TYPE_CARD, $sum);
-    }
-
-    /**
-     * @param int|float $sum Amount
-     *
-     * @return Payment
-     */
-    public static function createCash($sum)
-    {
-        return new static(static::TYPE_CASH, $sum);
+        return $this->sum;
     }
 
     /**
@@ -61,9 +71,9 @@ class Payment
      */
     public function asArray()
     {
-        return array(
+        return [
             'type' => $this->type,
             'sum' => $this->sum
-        );
+        ];
     }
 }

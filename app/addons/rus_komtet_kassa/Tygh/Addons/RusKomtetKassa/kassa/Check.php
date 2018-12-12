@@ -13,36 +13,8 @@ class Check
 {
     const INTENT_SELL = 'sell';
     const INTENT_SELL_RETURN = 'sellReturn';
-
-    /**
-     * Common tax system
-     */
-    const TS_COMMON = 0;
-
-    /**
-     * Simplified tax system: Income
-     */
-    const TS_SIMPLIFIED_IN = 1;
-
-    /**
-     * Simplified tax system: Income - Outgo
-     */
-    const TS_SIMPLIFIED_IN_OUT = 2;
-
-    /**
-     * An unified tax on imputed income
-     */
-    const TS_UTOII = 3;
-
-    /**
-     * Unified social tax
-     */
-    const TS_UST = 4;
-
-    /**
-     * Patent
-     */
-    const TS_PATENT = 5;
+    const INTENT_BUY = 'buy';
+    const INTENT_BUY_RETURN = 'buyReturn';
 
     /**
      * @var string
@@ -52,7 +24,7 @@ class Check
     /**
      * @var string
      */
-    private $email;
+    private $userContact;
 
     /**
      * @var string
@@ -72,51 +44,80 @@ class Check
     /**
      * @var Payment[]
      */
-    private $payments = array();
+    private $payments = [];
 
     /**
      * @var Position[]
      */
-    private $positions = array();
+    private $positions = [];
+
+    /**
+     * @var Cashier
+     */
+    private $cashier;
 
     /**
      * @param string $id An unique ID provided by an online store
-     * @param string $email User E-Mail
-     * @param string $intent Check::INTENT_SELL or Check::INTENT_SELL_RETURN
+     * @param string $userContact User E-Mail or phone
+     * @param string $intent Check::INTENT_SELL, Check::INTENT_SELL_RETURN, Check::INTENT_BUY, or Check::INTENT_BUY_RETURN
      * @param int    $taxSystem See Check::TS_*
      *
      * @return Check
      */
-    public function __construct($id, $email, $intent, $taxSystem)
+    public function __construct($id, $userContact, $intent, $taxSystem)
     {
         $this->id = $id;
-        $this->email = $email;
+        $this->userContact = $userContact;
         $this->intent = $intent;
         $this->taxSystem = $taxSystem;
     }
 
     /**
      * @param string $id
-     * @param string $email
+     * @param string $userContact
      * @param int    $taxSystem
      *
      * @return Check
      */
-    public static function createSell($id, $email, $taxSystem)
+    public static function createSell($id, $userContact, $taxSystem)
     {
-        return new static($id, $email, static::INTENT_SELL, $taxSystem);
+        return new static($id, $userContact, static::INTENT_SELL, $taxSystem);
     }
 
     /**
      * @param string $id
-     * @param string $email
+     * @param string $userContact
      * @param int    $taxSystem
      *
      * @return Check
      */
-    public static function createSellReturn($id, $email, $taxSystem)
+    public static function createSellReturn($id, $userContact, $taxSystem)
     {
-        return new static($id, $email, static::INTENT_SELL_RETURN, $taxSystem);
+        return new static($id, $userContact, static::INTENT_SELL_RETURN, $taxSystem);
+    }
+
+    /**
+     * @param string $id
+     * @param string $userContact
+     * @param int    $taxSystem
+     *
+     * @return Check
+     */
+    public static function createBuy($id, $userContact, $taxSystem)
+    {
+        return new static($id, $userContact, static::INTENT_BUY, $taxSystem);
+    }
+
+    /**
+     * @param string $id
+     * @param string $userContact
+     * @param int    $taxSystem
+     *
+     * @return Check
+     */
+    public static function createBuyReturn($id, $userContact, $taxSystem)
+    {
+        return new static($id, $userContact, static::INTENT_BUY_RETURN, $taxSystem);
     }
 
     /**
@@ -144,6 +145,18 @@ class Check
     }
 
     /**
+     * @param Cashier $cashier
+     *
+     * @return Check
+     */
+    public function addCashier(Cashier $cashier)
+    {
+        $this->cashier = $cashier;
+
+        return $this;
+    }
+
+    /**
      * @param Position $position
      *
      * @return Check
@@ -156,13 +169,68 @@ class Check
     }
 
     /**
+     * @return int|float
+     */
+    public function getTotalPositionsSum()
+    {
+        $positionsTotal = 0;
+        foreach( $this->positions as $position )
+        {
+            $positionsTotal += $position->getTotal();
+        }
+
+        return $positionsTotal;
+    }
+
+    /**
+     * @return array
+     */
+    public function getPositions()
+    {
+        return $this->positions;
+    }
+
+    /**
+     *
+     * Применение к позициям единой общей скидки на чек (например скидочного купона)
+     *
+     * @param float $checkDiscount
+     *
+     * @return Check
+     */
+    public function applyDiscount($checkDiscount)
+    {
+        $positionsTotal = $this->getTotalPositionsSum();
+        $checkPositions = $this->getPositions();
+
+        $positionsCount = count($checkPositions);
+        $accumulatedDiscount = 0;
+
+        foreach( $checkPositions as $index => $position )
+        {
+            if ($index < $positionsCount-1) {
+                $positionPricePercent = $position->getTotal() / $positionsTotal * 100;
+                $curPositionDiscount = round($checkDiscount * $positionPricePercent / 100, 2);
+                $accumulatedDiscount += $curPositionDiscount;
+            }
+            else {
+                $curPositionDiscount = round($checkDiscount - $accumulatedDiscount, 2);
+            }
+
+            $position->setTotal($position->getTotal() - $curPositionDiscount);
+        }
+
+        return $this;
+    }
+
+    /**
      * @return array
      */
     public function asArray()
     {
-        return array(
+        $result = [
             'task_id' => $this->id,
-            'user' => $this->email,
+            'user' => $this->userContact,
             'print' => $this->shouldPrint,
             'intent' => $this->intent,
             'sno' => $this->taxSystem,
@@ -178,6 +246,12 @@ class Check
                 },
                 $this->positions
             ),
-        );
+        ];
+
+        if ($this->cashier !== null) {
+            $result['cashier'] = $this->cashier->asArray();
+        }
+
+        return $result;
     }
 }

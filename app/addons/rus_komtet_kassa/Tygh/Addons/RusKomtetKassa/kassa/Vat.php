@@ -54,7 +54,7 @@ class Vat
             $rate = (string) $rate;
         }
 
-        $rate = str_replace(array('0.', '%'), '', $rate);
+        $rate = str_replace(['0.', '%'], '', $rate);
 
         switch ($rate) {
             case '10/110':
@@ -64,14 +64,14 @@ class Vat
                 $rate = static::RATE_118;
                 break;
             default:
-                if (!in_array($rate, array(
+                if (!in_array($rate, [
                     static::RATE_NO,
                     static::RATE_0,
                     static::RATE_10,
                     static::RATE_18,
                     static::RATE_110,
                     static::RATE_118,
-                ))) {
+                ])) {
                     throw new \InvalidArgumentException(sprintf('Unknown VAT rate: %s', $rate));
                 }
         }

@@ -9,8 +9,6 @@
 
 namespace Komtet\KassaSdk\Exception;
 
-include_once __DIR__.'/SdkException.php';
-
 class ClientException extends \RuntimeException implements SdkException
 {
 }

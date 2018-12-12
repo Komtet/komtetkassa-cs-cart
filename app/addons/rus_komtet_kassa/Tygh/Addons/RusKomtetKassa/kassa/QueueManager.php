@@ -19,7 +19,7 @@ class QueueManager
     /**
      * @var array List of registered queues
      */
-    private $queues = array();
+    private $queues = [];
 
     /**
      * @var string|null Name of the default queue
@@ -76,19 +76,18 @@ class QueueManager
      */
     public function hasQueue($name)
     {
-        return true;
-        // return array_key_exists($name, $this->queues);
+        return array_key_exists($name, $this->queues);
     }
 
     /**
      * Sends a check to queue
      *
-     * @param Check $check Check instance
+     * @param Check|CorrectionCheck $check Check instance
      * @param string $queueName Queue name
      *
      * @return mixed
      */
-    public function putCheck(Check $check, $queueName = null)
+    public function putCheck($check, $queueName = null)
     {
         if ($queueName === null) {
             if ($this->defaultQueue === null) {
@@ -119,8 +118,6 @@ class QueueManager
         }
         $path = sprintf('api/shop/v1/queues/%s', $this->queues[$name]);
         $data = $this->client->sendRequest($path);
-
-        return true;
-        // return is_array($data) && array_key_exists('state', $data) ? $data['state'] == 'active' : false;
+        return is_array($data) && array_key_exists('state', $data) ? $data['state'] == 'active' : false;
     }
 }

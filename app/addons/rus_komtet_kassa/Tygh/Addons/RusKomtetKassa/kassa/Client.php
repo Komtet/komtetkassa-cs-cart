@@ -10,6 +10,8 @@
 namespace Komtet\KassaSdk;
 
 use Komtet\KassaSdk\Exception\ClientException;
+use Psr\Log\LogLevel;
+use Psr\Log\LoggerInterface;
 
 class Client
 {
@@ -17,6 +19,11 @@ class Client
      * @var string
      */
     private $host = 'https://kassa.komtet.ru';
+
+    /**
+     * @var string
+     */
+    private $partner = null;
 
     /**
      * @var string
@@ -29,15 +36,27 @@ class Client
     private $secret;
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
+     * @var array A list of headers to be masked in logs
+     */
+    private $maskedHeaders = ['Authorization', 'X-HMAC-Signature'];
+
+    /**
      * @param string $key Shop ID
      * @param string $secret Secret key
+     * @param LoggerInterface $logger PSR Logger
      *
      * @return Client
      */
-    public function __construct($key, $secret)
+    public function __construct($key, $secret, LoggerInterface $logger = null)
     {
         $this->key = $key;
         $this->secret = $secret;
+        $this->logger = $logger;
     }
 
     /**
@@ -53,6 +72,18 @@ class Client
     }
 
     /**
+     * @param string $value
+     *
+     * @return Client
+     */
+    public function setPartner($value)
+    {
+        $this->partner = $value;
+
+        return $this;
+    }
+
+    /**
      * @param string $path
      * @param mixed $data
      *
@@ -60,8 +91,6 @@ class Client
      */
     public function sendRequest($path, $data = null)
     {
-        include_once __DIR__.'/Exception/ClientException.php';
-        
         if ($data === null) {
             $method = 'GET';
         } elseif (is_array($data)) {
@@ -74,11 +103,14 @@ class Client
         $url = sprintf('%s/%s', $this->host, $path);
         $signature = hash_hmac('md5', $method . $url . ($data ? $data : ''), $this->secret);
 
-        $headers = array(
+        $headers = [
             'Accept: application/json',
             sprintf('Authorization: %s', $this->key),
             sprintf('X-HMAC-Signature: %s', $signature)
-        );
+        ];
+        if (!empty($this->partner)) {
+            $headers[] = sprintf('X-Partner-ID: %s', $this->partner);
+        }
         if ($method == 'POST') {
             $headers[] = 'Content-Type: application/json';
         }
@@ -92,8 +124,14 @@ class Client
             curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
         }
         $response = curl_exec($ch);
-        $error = null;
 
+        $this->log(LogLevel::DEBUG, 'request: url={url} headers={headers} data={data}', [
+            'url' => $url,
+            'headers' => $this->maskHeaders($headers),
+            'data' => $data
+        ]);
+
+        $error = null;
         if ($response === false) {
             $error = curl_error($ch);
         } else {
@@ -104,14 +142,39 @@ class Client
         }
         curl_close($ch);
         if ($error !== null) {
-            $error_data = array (
-                'status' => 'error',
-                'description' => json_decode($response)->description
-            );
-            $check_as_array = json_decode($data);
-            db_query('UPDATE ?:rus_komtet_kassa_order_fiscalization_status SET ?u WHERE order_id = ?i', $error_data, $check_as_array->task_id);
-            // throw new ClientException($error);
+            $this->log(LogLevel::WARNING, 'error: {error} {response}', [
+                'error' => $error,
+                'response' => $response
+            ]);
+            fn_set_notification('E', fn_get_lang_var('warning'), print_r($response, true), true, 'insecure_password');
         }
+
+        $this->log(LogLevel::DEBUG, 'response: {response}', ['response' => $response]);
+
         return json_decode($response, true);
+    }
+
+    private function log($level, $message, $context)
+    {
+        if ($this->logger !== null) {
+            $message = sprintf('KOMTET Kassa %s', $message);
+            $this->logger->log($level, $message, $context);
+        }
+    }
+
+    private function maskHeaders($headers)
+    {
+        return array_map(
+            function($header) {
+                $parts = explode(':', $header);
+                $key = trim($parts[0]);
+                $value = trim($parts[1]);
+                if (in_array($key, $this->maskedHeaders)) {
+                    $value =  str_repeat('*', strlen($value) - 2) . substr($value, -2);
+                }
+                return [$key, $value];
+            },
+            $headers
+        );
     }
 }
