@@ -13,13 +13,13 @@ class komtetHelper
     public static function fiscalize($order, $params, $is_refund)
     {
 
-        include_once __DIR__.'/kassa/Check.php';
-        include_once __DIR__.'/kassa/Position.php';
-        include_once __DIR__.'/kassa/Vat.php';
-        include_once __DIR__.'/kassa/Client.php';
-        include_once __DIR__.'/kassa/QueueManager.php';
-        include_once __DIR__.'/kassa/Payment.php';
-        include_once __DIR__.'/kassa/Exception/SdkException.php';
+        include_once __DIR__.'/kassa/src/Check.php';
+        include_once __DIR__.'/kassa/src/Position.php';
+        include_once __DIR__.'/kassa/src/Vat.php';
+        include_once __DIR__.'/kassa/src/Client.php';
+        include_once __DIR__.'/kassa/src/QueueManager.php';
+        include_once __DIR__.'/kassa/src/Payment.php';
+        include_once __DIR__.'/kassa/src/Exception/SdkException.php';
 
         $data = array (
             'order_id' => $order['order_id'],
