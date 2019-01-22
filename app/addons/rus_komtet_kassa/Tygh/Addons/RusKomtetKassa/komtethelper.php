@@ -40,12 +40,13 @@ class komtetHelper
 
         foreach( $positions as $position )
         {
-            $total += round($position['amount']*$position['price'], 2);
+            $positionTotal = round($position['amount']*$position['price'], 2);
+            $total += $positionTotal;
 
             $positionObj = new Position($position['product'],
-                                        round($position['price'], 2), // price with discount of position
+                                        round($position['base_price'], 2), // price without discount of position
                                         floatval($position['amount']),
-                                        round($position['amount']*$position['price'], 2),
+                                        $positionTotal,
                                         floatval($position['discount']),
                                         $vat);
 
