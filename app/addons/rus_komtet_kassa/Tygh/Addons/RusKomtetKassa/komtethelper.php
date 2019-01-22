@@ -80,7 +80,6 @@ class komtetHelper
         try {
             $queueManager->putCheck($check, 'print_que');
         } catch (SdkException $e) {
-            fn_set_notification('E', fn_get_lang_var('warning'), print_r($response, true), true, 'insecure_password');
             $data = array (
                 'status' => 'error',
                 'description' => $e->getMessage()
