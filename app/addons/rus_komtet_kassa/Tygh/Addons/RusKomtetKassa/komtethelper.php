@@ -6,6 +6,8 @@ use Komtet\KassaSdk\Vat;
 use Komtet\KassaSdk\Client;
 use Komtet\KassaSdk\QueueManager;
 use Komtet\KassaSdk\Payment;
+use Komtet\KassaSdk\Exception\SdkException;
+use Komtet\KassaSdk\Exception\ClientException;
 
 
 class komtetHelper
@@ -20,6 +22,7 @@ class komtetHelper
         include_once __DIR__.'/kassa/src/QueueManager.php';
         include_once __DIR__.'/kassa/src/Payment.php';
         include_once __DIR__.'/kassa/src/Exception/SdkException.php';
+        include_once __DIR__.'/kassa/src/Exception/ClientException.php';
 
         $data = array (
             'order_id' => $order['order_id'],
@@ -53,7 +56,7 @@ class komtetHelper
             $check->addPosition($positionObj);
         }
 
-        $orderDiscount = $total - $order['total'];
+        $orderDiscount = $total - ($order['total'] - $order['shipping_cost']);
         $check->applyDiscount($orderDiscount);
         $total -= $orderDiscount;
 
@@ -72,19 +75,18 @@ class komtetHelper
 
         $payment = new Payment(Payment::TYPE_CARD, round($total, 2));
         $check->addPayment($payment);
-
         $client = new Client($params['shop_id'], $params['secret']);
         $queueManager = new QueueManager($client);
-
         $queueManager->registerQueue('print_que', $params['queue_id']);
 
         try {
             $queueManager->putCheck($check, 'print_que');
-        } catch (SdkException $e) {
+        } catch (ClientException $e) {
             $data = array (
                 'status' => 'error',
                 'description' => $e->getMessage()
             );
+            fn_set_notification('W', fn_get_lang_var('warning'), '<pre>Komtet Kassa: '.print_r($data, true).'</pre>', true);
             db_query('UPDATE ?:rus_komtet_kassa_order_fiscalization_status SET ?u WHERE order_id = ?i', $data, $order['order_id']);
         }
     }
