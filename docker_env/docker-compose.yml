@@ -1,27 +1,26 @@
-version: '3'
-
+version: '2'
 services:
-  db:
-    image: mysql:5.7
-    container_name: cscart_mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: my_secret_pw_shh
-      MYSQL_DATABASE: test_db
-      MYSQL_USER: devuser
-      MYSQL_PASSWORD: devpass
-    volumes:
-      - ./mysql:/var/lib/mysql
-  web:
-    image: cs_web:last
-    build: ./
-    container_name: cscart_php_web
-    depends_on:
-      - db
-    volumes:
-      - ./php/:/var/www/html/
-    ports:
-      - "8100:80"
-    links:
-      - db:mysql
-    stdin_open: true
-    tty: true
+    cscart:
+        container_name: my-cscart
+        build: .
+        environment:
+            SERVER_NAME: www.example.com:80
+            STDOUT_ERROR_LOG: "TRUE"
+            STDOUT_CUSTOM_LOG: "FALSE"
+        ports:
+            - 8100:80
+        volumes:
+            - ./php:/var/www/html
+        links:
+            - db:db
+        tty: true
+    db:
+      image: mysql:5.7
+      container_name: cscart_mysql
+      environment:
+        MYSQL_ROOT_PASSWORD: my_secret_pw_shh
+        MYSQL_DATABASE: test_db
+        MYSQL_USER: devuser
+        MYSQL_PASSWORD: devpass
+      volumes:
+        - ./mysql:/var/lib/mysql

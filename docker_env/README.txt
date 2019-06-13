@@ -6,8 +6,8 @@ komtet_kassa_cscart
 2. создать папку для хранения данных БД /mysql
 3. выполнить docker-compose up -d
 4. перейти в браузере на localhost:8100 и выполнить установку CMS, параметры подключения к БД указать
-    host: mysql,
-    user: root,
-    password: my_secret_pw_shh,
+    host: db,
+    user: devuser,
+    password: devpass,
     db: test_db
 5. установить и настроить плагин через инсталлер
