@@ -1,16 +1,16 @@
 <?php
 
-function fn_settings_variants_addons_rus_komtet_kassa_statuses_paid()
+function fn_settings_variants_addons_rus_komtet_kassa_intelcrew_statuses_paid()
 {
     return fn_get_simple_statuses(STATUSES_ORDER);
 }
 
-function fn_settings_variants_addons_rus_komtet_kassa_statuses_refund()
+function fn_settings_variants_addons_rus_komtet_kassa_intelcrew_statuses_refund()
 {
     return fn_get_simple_statuses(STATUSES_ORDER);
 }
 
-function fn_settings_variants_addons_rus_komtet_kassa_payment_systems()
+function fn_settings_variants_addons_rus_komtet_kassa_intelcrew_payment_systems()
 {
     $result = array();
     $payments = fn_get_payments(DESCR_SL);
@@ -22,10 +22,10 @@ function fn_settings_variants_addons_rus_komtet_kassa_payment_systems()
     return $result;
 }
 
-function fn_settings_variants_addons_rus_komtet_kassa_default_sno()
+function fn_settings_variants_addons_rus_komtet_kassa_intelcrew_default_sno()
 {
     $result = array();
-    $schema = fn_get_schema('rus_komtet_kassa', 'default_sno');
+    $schema = fn_get_schema('rus_komtet_kassa_intelcrew', 'default_sno');
 
     foreach ($schema as $key => $item) {
         $result[$key] = $item['name'];
@@ -34,10 +34,10 @@ function fn_settings_variants_addons_rus_komtet_kassa_default_sno()
     return $result;
 }
 
-function fn_settings_variants_addons_rus_komtet_kassa_default_vat()
+function fn_settings_variants_addons_rus_komtet_kassa_intelcrew_default_vat()
 {
     $result = array();
-    $schema = fn_get_schema('rus_komtet_kassa', 'default_vat');
+    $schema = fn_get_schema('rus_komtet_kassa_intelcrew', 'default_vat');
 
     foreach ($schema as $key => $item) {
         $result[$key] = $item['name'];
@@ -46,7 +46,7 @@ function fn_settings_variants_addons_rus_komtet_kassa_default_vat()
     return $result;
 }
 
-function fn_settings_variants_addons_rus_komtet_kassa_is_print_check()
+function fn_settings_variants_addons_rus_komtet_kassa_intelcrew_is_print_check()
 {
     return array(
         true => "Да",

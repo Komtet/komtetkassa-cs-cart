@@ -1,0 +1,140 @@
+<?php
+
+use Tygh\Registry;
+use Tygh\Settings;
+require_once('Tygh/Addons/RusKomtetKassa/komtethelper.php');
+
+/**
+ * Gets extra settings.
+ *
+ * @return array
+ */
+function fn_rus_komtet_kassa_intelcrew_get_settings()
+{
+    if (!Registry::isExist('rus_komtet_kassa_intelcrew.extra_settings')) {
+        $settings = json_decode(Registry::get('addons.rus_komtet_kassa_intelcrew.extra'), true);
+
+        if (!is_array($settings)) {
+            $settings = array();
+        }
+
+        Registry::set('rus_komtet_kassa_intelcrew.extra_settings', $settings, false);
+    }
+
+    return (array) Registry::get('rus_komtet_kassa_intelcrew.extra_settings');
+}
+
+/**
+ * Updates extra setting.
+ *
+ * @param string    $setting_name   Extra setting name
+ * @param mixed     $value          Value
+ */
+function fn_rus_komtet_kassa_intelcrew_update_setting($setting_name, $value)
+{
+    $settings = fn_rus_komtet_kassa_intelcrew_get_settings();
+    $settings[$setting_name] = $value;
+
+    Registry::set(sprintf('rus_komtet_kassa_intelcrew.extra_settings.%s', $setting_name), $value);
+    Settings::instance()->updateValue('extra', json_encode($settings), 'rus_komtet_kassa_intelcrew', false, false);
+}
+
+/**
+ * Gets external payments.
+ *
+ * @return array
+ */
+function fn_rus_komtet_kassa_intelcrew_get_external_payments()
+{
+    return fn_get_schema('rus_komtet_kassa_intelcrew', 'payments');
+}
+
+/**
+ * Gets payments external identifiers.
+ *
+ * @return array
+ */
+function fn_rus_komtet_kassa_intelcrew_get_external_payments_ids()
+{
+    $settings = fn_rus_komtet_kassa_intelcrew_get_external_payments();
+
+    return isset($settings['payments_map']) ? $settings['payments_map'] : array();
+}
+
+/**
+ * Sets payment external identifier.
+ *
+ * @param int  $payment_id  Local identifier
+ * @param int  $external_id External identifier
+ */
+function fn_rus_komtet_kassa_intelcrew_set_payment_external_id($payment_id, $external_id)
+{
+    $external_payments = fn_rus_komtet_kassa_intelcrew_get_external_payments();
+    $map = fn_rus_komtet_kassa_intelcrew_get_external_payments_ids();
+
+    if (isset($external_payments[$external_id])) {
+        $map[$payment_id] = $external_id;
+    } else {
+        unset($map[$payment_id]);
+    }
+
+    fn_rus_komtet_kassa_intelcrew_register_update_setting('payments_map', $map);
+}
+
+/**
+ * Gets payment external identifier.
+ *
+ * @param int $payment_id Payment identifier
+ *
+ * @return int|null
+ */
+function fn_rus_komtet_kassa_intelcrew_get_payment_external_id($payment_id)
+{
+    $map = fn_rus_komtet_kassa_intelcrew_get_external_payments_ids();
+
+    return isset($map[$payment_id]) ? $map[$payment_id] : null;
+}
+
+/**
+ * Hook handler: after order status changed.
+ *
+ * @param string $status_to     Order status to
+ * @param string $status_from   Order status from
+ * @param array  $order_info    Order data
+ */
+function fn_rus_komtet_kassa_intelcrew_change_order_status($status_to, $status_from, $order_info)
+{
+    $payment_ids = array_keys(Registry::get('addons.rus_komtet_kassa_intelcrew.payment_systems'));
+    // if(in_array(intval($order_info['payment_id']), $payment_ids, true)){
+
+        $order_status = db_get_row('SELECT * FROM ?:rus_komtet_kassa_intelcrew_order_fiscalization_status WHERE order_id = ?i ', intval($order_info['order_id']));
+        if (empty($order_status) || $order_status['status'] == 'error') {
+
+            $order = [
+                'email' => $order_info['email'],
+                'order_id' => intval($order_info['order_id']),
+                'total' => $order_info['total'],
+                'positions' => $order_info['products'],
+                'shipping_cost' => $order_info['shipping_cost']
+            ];
+
+            $params = [
+                'sno' => Registry::get('addons.rus_komtet_kassa_intelcrew.default_sno'),
+                'is_print_check' => Registry::get('addons.rus_komtet_kassa_intelcrew.is_print_check'),
+                'vat' => Registry::get('addons.rus_komtet_kassa_intelcrew.default_vat'),
+                'shop_id' => Registry::get('addons.rus_komtet_kassa_intelcrew.shop_id'),
+                'secret' => Registry::get('addons.rus_komtet_kassa_intelcrew.shop_secret'),
+                'queue_id' => Registry::get('addons.rus_komtet_kassa_intelcrew.queue_id'),
+                'statuses_paid' => Registry::get('addons.rus_komtet_kassa_intelcrew.statuses_paid'),
+                'statuses_refund' => Registry::get('addons.rus_komtet_kassa_intelcrew.statuses_refund')
+            ];
+
+            if(in_array($status_to, array_keys($params['statuses_refund']), true)) {
+                komtetHelper::fiscalize($order, $params, true);
+            }
+            elseif (in_array($status_to, array_keys($params['statuses_paid']), true)) {
+                komtetHelper::fiscalize($order, $params, false);
+            }
+        }
+    // }
+}

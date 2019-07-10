@@ -11,7 +11,7 @@ if ($mode == 'report') {
 	);
 
     if ($order_id) {
-    	db_query('UPDATE ?:rus_komtet_kassa_order_fiscalization_status SET ?u WHERE order_id = ?i', $data, $order_id);
+    	db_query('UPDATE ?:rus_komtet_kassa_intelcrew_order_fiscalization_status SET ?u WHERE order_id = ?i', $data, $order_id);
     }
 
 	fn_print_r("OK");

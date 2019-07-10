@@ -1,6 +1,6 @@
 <?php
 
-function fn_settings_actions_addons_rus_komtet_kassa_shop_id($value, $old_value)
+function fn_settings_actions_addons_rus_komtet_kassa_intelcrew_shop_id($value, $old_value)
 {
     $value = trim($value);
 
@@ -15,7 +15,7 @@ function fn_settings_actions_addons_rus_komtet_kassa_shop_id($value, $old_value)
     }
 }
 
-function fn_settings_actions_addons_rus_komtet_kassa_shop_secret($value, $old_value)
+function fn_settings_actions_addons_rus_komtet_kassa_intelcrew_shop_secret($value, $old_value)
 {
     $value = trim($value);
 
@@ -30,7 +30,7 @@ function fn_settings_actions_addons_rus_komtet_kassa_shop_secret($value, $old_va
     }
 }
 
-function fn_settings_actions_addons_rus_komtet_kassa_queue_id($value, $old_value)
+function fn_settings_actions_addons_rus_komtet_kassa_intelcrew_queue_id($value, $old_value)
 {
     $value = trim($value);
 

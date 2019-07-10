@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <addon scheme="3.0">
-    <id>rus_komtet_kassa</id>
-    <name>KOMTET Kassa</name>
-    <version>1.1.1</version>
+    <id>rus_komtet_kassa_intelcrew</id>
+    <name>KOMTET Kassa - Intelcrew</name>
+    <version>1.1.2</version>
     <priority>1001</priority>
     <status>active</status>
     <default_language>en</default_language>
@@ -52,7 +52,7 @@
 
     <queries>
         <item>
-            CREATE TABLE IF NOT EXISTS `?:rus_komtet_kassa_order_fiscalization_status` (
+            CREATE TABLE IF NOT EXISTS `?:rus_komtet_kassa_intelcrew_order_fiscalization_status` (
                 `id` int(10) NOT NULL AUTO_INCREMENT,
                 `order_id` int(10) NOT NULL,
                 `status` varchar(25),
@@ -60,6 +60,6 @@
                 PRIMARY KEY (`id`)
             );
         </item>
-        <item for="uninstall">DROP TABLE IF EXISTS `?:rus_komtet_kassa_order_fiscalization_status`;</item>
+        <item for="uninstall">DROP TABLE IF EXISTS `?:rus_komtet_kassa_intelcrew_order_fiscalization_status`;</item>
     </queries>
 </addon>
