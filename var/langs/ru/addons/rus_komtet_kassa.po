@@ -58,12 +58,12 @@ msgstr "Печатать ли бумажный чек"
 
 msgctxt "SettingsOptions::rus_komtet_kassa::shop_id"
 msgid "ShopId"
-msgstr "ShopId Магазина"
+msgstr "ID магазина"
 
 msgctxt "SettingsOptions::rus_komtet_kassa::shop_secret"
 msgid "Shop Secret"
-msgstr "Secret Магазина"
+msgstr "Секретный ключ магазина"
 
 msgctxt "SettingsOptions::rus_komtet_kassa::queue_id"
 msgid "Queue ID"
-msgstr "ID Очереди"
+msgstr "ID очереди"
