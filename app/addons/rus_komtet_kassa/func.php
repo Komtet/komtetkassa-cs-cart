@@ -112,6 +112,7 @@ function fn_rus_komtet_kassa_change_order_status($status_to, $status_from, $orde
 
             $order = [
                 'email' => $order_info['email'],
+                'phone' => $order_info['phone'],
                 'order_id' => intval($order_info['order_id']),
                 'total' => $order_info['total'],
                 'positions' => $order_info['products'],

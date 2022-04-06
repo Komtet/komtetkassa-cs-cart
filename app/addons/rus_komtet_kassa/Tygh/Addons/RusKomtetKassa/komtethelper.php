@@ -34,7 +34,13 @@ class komtetHelper
 
         $method = $is_refund ? Check::INTENT_SELL_RETURN : Check::INTENT_SELL;
 
-        $check = new Check($order['order_id'], $order['email'], $method, intval($params['sno']));
+        if ($order['email']) {
+            $user_contact = $order['email'];
+        } else {
+            $user_contact = mb_eregi_replace("[^0-9+]", '', $order['phone']);
+        }
+
+        $check = new Check($order['order_id'], $user_contact, $method, intval($params['sno']));
         $check->setShouldPrint($params['is_print_check']);
 
         $vat = new Vat($params['vat']);
