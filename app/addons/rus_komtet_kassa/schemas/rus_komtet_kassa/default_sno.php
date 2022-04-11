@@ -10,9 +10,6 @@ $schema = array(
     '2' => array(
         'name' => 'УСН доход - расход',
     ),
-    '3' => array(
-        'name' => 'ЕНВД',
-    ),
     '4' => array(
         'name' => 'ЕСН',
     ),
