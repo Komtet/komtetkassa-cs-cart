@@ -117,6 +117,11 @@ function fn_rus_komtet_kassa_change_order_status($status_to, $status_from, $orde
         $is_order_will_be_returned = in_array($status_to, $statuses_refund, true);
         $is_order_will_be_paid = in_array($status_to, $statuses_paid, true);
 
+        $fisc_status = null;
+        if (!empty($komtet_kassa_fisc_status)) {
+            $fisc_status = $komtet_kassa_fisc_status['status']
+        }
+
         // если
         // (
         //  (заказ ещё не фискализирован И делается оплата)
@@ -129,13 +134,13 @@ function fn_rus_komtet_kassa_change_order_status($status_to, $status_from, $orde
         // )
         if (
             (
-             ((empty($komtet_kassa_fisc_status) && $is_order_will_be_paid)) ||
-             ($komtet_kassa_fisc_status['status'] == 'error' &&
+             ($fisc_status == null && $is_order_will_be_paid) ||
+             ($fisc_status == 'error' &&
               ($is_order_will_be_paid || $is_order_will_be_returned)
              )
             ) ||
-            ($komtet_kassa_fisc_status['status'] == 'done' && (($is_order_was_returned && $is_order_will_be_paid) ||
-                                                               ($is_order_was_paid && $is_order_will_be_returned)))
+            ($fisc_status == 'done' && (($is_order_was_returned && $is_order_will_be_paid) ||
+                                        ($is_order_was_paid && $is_order_will_be_returned)))
         )
         {
             $order = [
