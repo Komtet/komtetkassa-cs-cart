@@ -119,7 +119,7 @@ function fn_rus_komtet_kassa_change_order_status($status_to, $status_from, $orde
 
         // если
         // (
-        //  (заказ не фискализирован И делается оплата)
+        //  (заказ ещё не фискализирован И делается оплата)
         //   ЛИБО
         //  (была ошибка фискализации И делается оплата/возврат)
         // )
@@ -138,7 +138,6 @@ function fn_rus_komtet_kassa_change_order_status($status_to, $status_from, $orde
                                                                ($is_order_was_paid && $is_order_will_be_returned)))
         )
         {
-
             $order = [
                 'email' => $order_info['email'],
                 'phone' => $order_info['phone'],
