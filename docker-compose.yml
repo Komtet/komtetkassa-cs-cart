@@ -1,28 +1,29 @@
-version: '2'
+version: "3.1"
 services:
-    cscart:
-        container_name: my-cscart
-        build: .
-        environment:
-            SERVER_NAME: www.example.com:80
-            STDOUT_ERROR_LOG: "TRUE"
-            STDOUT_CUSTOM_LOG: "FALSE"
-        ports:
-            - 8100:80
-        volumes:
-            - ./php:/var/www/html
-        links:
-            - db:db
-        tty: true
-    db:
-        image: mysql:5.7
-        container_name: cscart_mysql
-        environment:
-            MYSQL_ROOT_PASSWORD: my_secret_pw_shh
-            MYSQL_DATABASE: test_db
-            MYSQL_USER: devuser
-            MYSQL_PASSWORD: devpass
-        volumes:
-            - ./mysql:/var/lib/mysql
-        ports:
-            - 9907:3306
+
+  cscart_mysql5.7:
+    image: mysql:5.7
+    container_name: cscart_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: my_secret_pw_shh
+      MYSQL_DATABASE: cscart_db
+      MYSQL_USER: devuser
+      MYSQL_PASSWORD: devpass
+    volumes:
+      - ./db:/var/lib/mysql
+    ports:
+      - "9907:3306"
+
+  cscart_php7.4:
+    build:
+      context: ./config
+      dockerfile: Dockerfile
+    container_name: cscart_php7.4
+    volumes:
+      - ./php:/var/www/html/
+      - ./config/php-ini-overrides.ini:/usr/local/etc/php/conf.d/00-php.ini
+      - ./bin/sendmail:/usr/local/bin/sendmail
+    environment:
+        PHP_IDE_CONFIG: serverName=localhost
+    ports:
+      - "8100:80"
