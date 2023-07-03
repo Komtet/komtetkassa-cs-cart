@@ -107,9 +107,42 @@ function fn_rus_komtet_kassa_change_order_status($status_to, $status_from, $orde
     $payment_ids = array_keys(Registry::get('addons.rus_komtet_kassa.payment_systems'));
     if(in_array(intval($order_info['payment_id']), $payment_ids, true)){
 
-        $order_status = db_get_row('SELECT * FROM ?:rus_komtet_kassa_order_fiscalization_status WHERE order_id = ?i ', intval($order_info['order_id']));
-        if (empty($order_status) || $order_status['status'] == 'error') {
+        $statuses_paid = array_keys(Registry::get('addons.rus_komtet_kassa.statuses_paid'));
+        $statuses_refund = array_keys(Registry::get('addons.rus_komtet_kassa.statuses_refund'));
 
+        $komtet_kassa_fisc_status = db_get_row('SELECT * FROM ?:rus_komtet_kassa_order_fiscalization_status WHERE order_id = ?i ', intval($order_info['order_id']));
+
+        $is_order_was_returned = in_array($status_from, $statuses_refund, true);
+        $is_order_was_paid = in_array($status_from, $statuses_paid, true);
+        $is_order_will_be_returned = in_array($status_to, $statuses_refund, true);
+        $is_order_will_be_paid = in_array($status_to, $statuses_paid, true);
+
+        $fisc_status = null;
+        if (!empty($komtet_kassa_fisc_status)) {
+            $fisc_status = $komtet_kassa_fisc_status['status']
+        }
+
+        // если
+        // (
+        //  (заказ ещё не фискализирован И делается оплата)
+        //   ЛИБО
+        //  (была ошибка фискализации И делается оплата/возврат)
+        // )
+        // ЛИБО
+        // (
+        //  заказ был фискализирован И ((он был оплачен И делается возврат) ЛИБО (он был возвращен И делается оплата))
+        // )
+        if (
+            (
+             ($fisc_status == null && $is_order_will_be_paid) ||
+             ($fisc_status == 'error' &&
+              ($is_order_will_be_paid || $is_order_will_be_returned)
+             )
+            ) ||
+            ($fisc_status == 'done' && (($is_order_was_returned && $is_order_will_be_paid) ||
+                                        ($is_order_was_paid && $is_order_will_be_returned)))
+        )
+        {
             $order = [
                 'email' => $order_info['email'],
                 'phone' => $order_info['phone'],
@@ -130,12 +163,7 @@ function fn_rus_komtet_kassa_change_order_status($status_to, $status_from, $orde
                 'statuses_refund' => Registry::get('addons.rus_komtet_kassa.statuses_refund')
             ];
 
-            if(in_array($status_to, array_keys($params['statuses_refund']), true)) {
-                komtetHelper::fiscalize($order, $params, true);
-            }
-            elseif (in_array($status_to, array_keys($params['statuses_paid']), true)) {
-                komtetHelper::fiscalize($order, $params, false);
-            }
+            komtetHelper::fiscalize($order, $params, $is_order_will_be_returned);
         }
     }
 }
