@@ -2,7 +2,7 @@
 <addon scheme="3.0">
     <id>rus_komtet_kassa</id>
     <name>KOMTET Kassa</name>
-    <version>1.1.3</version>
+    <version>1.1.5</version>
     <priority>1001</priority>
     <status>active</status>
     <default_language>en</default_language>

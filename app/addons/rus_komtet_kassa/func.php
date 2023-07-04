@@ -119,7 +119,7 @@ function fn_rus_komtet_kassa_change_order_status($status_to, $status_from, $orde
 
         $fisc_status = null;
         if (!empty($komtet_kassa_fisc_status)) {
-            $fisc_status = $komtet_kassa_fisc_status['status']
+            $fisc_status = $komtet_kassa_fisc_status['status'];
         }
 
         // если
