@@ -110,16 +110,30 @@ function fn_rus_komtet_kassa_change_order_status($status_to, $status_from, $orde
         $statuses_paid = array_keys(Registry::get('addons.rus_komtet_kassa.statuses_paid'));
         $statuses_refund = array_keys(Registry::get('addons.rus_komtet_kassa.statuses_refund'));
 
-        $komtet_kassa_fisc_status = db_get_row('SELECT * FROM ?:rus_komtet_kassa_order_fiscalization_status WHERE order_id = ?i ', intval($order_info['order_id']));
+        $komtet_kassa_fisc_statuses = db_get_array(
+            'SELECT * FROM ?:rus_komtet_kassa_order_fiscalization_status
+             WHERE order_id = ?i
+             ORDER BY id DESC',
+            intval($order_info['order_id'])
+        );
 
         $is_order_was_returned = in_array($status_from, $statuses_refund, true);
         $is_order_was_paid = in_array($status_from, $statuses_paid, true);
         $is_order_will_be_returned = in_array($status_to, $statuses_refund, true);
         $is_order_will_be_paid = in_array($status_to, $statuses_paid, true);
 
+        # последний статус
         $fisc_status = null;
-        if (!empty($komtet_kassa_fisc_status)) {
-            $fisc_status = $komtet_kassa_fisc_status['status'];
+        # был ли среди статусов done, потому что последний может быть error на попытку возврата
+        $is_order_was_fiscalized = False;
+        if (!empty($komtet_kassa_fisc_statuses)) {
+            $fisc_status = $komtet_kassa_fisc_statuses[0]['status'];
+
+            foreach($komtet_kassa_fisc_statuses as &$status) {
+                if ($status['status'] == 'done') {
+                    $is_order_was_fiscalized = True;
+                }
+            }
         }
 
         // если
@@ -130,17 +144,19 @@ function fn_rus_komtet_kassa_change_order_status($status_to, $status_from, $orde
         // )
         // ЛИБО
         // (
-        //  заказ был фискализирован И ((он был оплачен И делается возврат) ЛИБО (он был возвращен И делается оплата))
+        //  заказ был фискализирован И ((он был возвращен И делается оплата) ЛИБО
+        //                               делается возврат)
         // )
+
         if (
             (
-             ($fisc_status == null && $is_order_will_be_paid) ||
+             (!$is_order_was_fiscalized && $is_order_will_be_paid) ||
              ($fisc_status == 'error' &&
               ($is_order_will_be_paid || $is_order_will_be_returned)
              )
             ) ||
-            ($fisc_status == 'done' && (($is_order_was_returned && $is_order_will_be_paid) ||
-                                        ($is_order_was_paid && $is_order_will_be_returned)))
+            ($is_order_was_fiscalized && (($is_order_was_returned && $is_order_will_be_paid) ||
+                                           $is_order_will_be_returned))
         )
         {
             $order = [
