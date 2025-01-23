@@ -20,6 +20,7 @@ stop:  ## Остановить контейнер
 
 update:  ## Обновить модуль
 	@cp -r -f app/addons/rus_komtet_kassa/. php/app/addons/rus_komtet_kassa/
+	@cp -f var/langs/ru/addons/rus_komtet_kassa.po php/var/langs/ru/addons/
 
 release:  ## Архивировать для загрузки в маркет
 	@rm ${FILENAME} || echo "No file to remove"
