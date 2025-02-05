@@ -1,13 +1,14 @@
 <?php
 
-use Komtet\KassaSdk\Check;
-use Komtet\KassaSdk\Position;
-use Komtet\KassaSdk\Vat;
-use Komtet\KassaSdk\Client;
-use Komtet\KassaSdk\QueueManager;
-use Komtet\KassaSdk\Payment;
+use Komtet\KassaSdk\v1\Check;
+use Komtet\KassaSdk\v1\Position;
+use Komtet\KassaSdk\v1\Vat;
+use Komtet\KassaSdk\v1\Client;
+use Komtet\KassaSdk\v1\QueueManager;
+use Komtet\KassaSdk\v1\Payment;
 use Komtet\KassaSdk\Exception\SdkException;
 use Komtet\KassaSdk\Exception\ClientException;
+use Komtet\KassaSdk\Exception\ApiValidationException;
 
 
 class komtetHelper
@@ -15,14 +16,14 @@ class komtetHelper
     public static function fiscalize($order, $params, $is_refund)
     {
 
-        include_once __DIR__.'/kassa/src/Check.php';
-        include_once __DIR__.'/kassa/src/Position.php';
-        include_once __DIR__.'/kassa/src/Vat.php';
-        include_once __DIR__.'/kassa/src/Client.php';
-        include_once __DIR__.'/kassa/src/QueueManager.php';
-        include_once __DIR__.'/kassa/src/Payment.php';
-        include_once __DIR__.'/kassa/src/Exception/SdkException.php';
-        include_once __DIR__.'/kassa/src/Exception/ClientException.php';
+        include_once __DIR__.'/kassa/src/v1/Check.php';
+        include_once __DIR__.'/kassa/src/v1/Position.php';
+        include_once __DIR__.'/kassa/src/v1/Vat.php';
+        include_once __DIR__.'/kassa/src/v1/Client.php';
+        include_once __DIR__.'/kassa/src/v1/QueueManager.php';
+        include_once __DIR__.'/kassa/src/v1/Payment.php';
+        include_once __DIR__.'/kassa/src/v1/Exception/SdkException.php';
+        include_once __DIR__.'/kassa/src/v1/Exception/ClientException.php';
 
         $data = array (
             'order_id' => $order['order_id'],
@@ -56,7 +57,6 @@ class komtetHelper
                                         round($position['base_price'], 2), // price without discount of position
                                         floatval($position['amount']),
                                         $positionTotal,
-                                        floatval($position['discount']),
                                         $vat);
 
             $check->addPosition($positionObj);
@@ -74,7 +74,6 @@ class komtetHelper
                                              round($order['shipping_cost'], 2),
                                              1,
                                              round($order['shipping_cost'], 2),
-                                             0,
                                              $vat);
             $check->addPosition($shippingPosition);
         }
