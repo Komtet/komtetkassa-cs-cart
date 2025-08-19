@@ -1,6 +1,6 @@
 SHELL:=/bin/bash
 VERSION=$(shell grep -o '^[0-9]\+\.[0-9]\+\.[0-9]\+' CHANGELOG.rst | head -n1)
-FILENAME=komtetkassa-$(shell grep -o '^[0-9]\+\.[0-9]\+\.[0-9]\+' CHANGELOG.rst | head -n1).zip
+FILENAME=komtetkassa-$(VERSION).zip
 
 # Colors
 Color_Off=\033[0m
@@ -14,7 +14,7 @@ version:  ## Версия проекта
 
 start:  ## Запустить контейнер
 	@docker-compose up --build
-	
+
 stop:  ## Остановить контейнер
 	@docker-compose down
 
@@ -23,8 +23,9 @@ update:  ## Обновить модуль
 	@cp -f var/langs/ru/addons/rus_komtet_kassa.po php/var/langs/ru/addons/
 
 release:  ## Архивировать для загрузки в маркет
-	@rm ${FILENAME} || echo "No file to remove"
-	@zip -r ${FILENAME} app var --exclude=*docker_env*
+	@mkdir -p releases
+	@rm -f releases/$(FILENAME) || true
+	@zip -r releases/$(FILENAME) app var --exclude=*docker_env*
 
 .PHONY: version  release
 .DEFAULT_GOAL := version

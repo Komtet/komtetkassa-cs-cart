@@ -6,7 +6,7 @@
     <priority>1001</priority>
     <status>active</status>
     <default_language>en</default_language>
-    
+
     <compatibility>
         <core_version>
             <min>4.3.9</min>
@@ -32,6 +32,9 @@
                     </item>
                     <item id="payment_systems">
                         <type>multiple select</type>
+                    </item>
+                    <item id="is_internet">
+                        <type>selectbox</type>
                     </item>
                     <item id="is_print_check">
                         <type>selectbox</type>
