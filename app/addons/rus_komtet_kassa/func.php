@@ -170,6 +170,7 @@ function fn_rus_komtet_kassa_change_order_status($status_to, $status_from, $orde
 
             $params = [
                 'sno' => Registry::get('addons.rus_komtet_kassa.default_sno'),
+                'is_internet' => Registry::get('addons.rus_komtet_kassa.is_internet'),
                 'is_print_check' => Registry::get('addons.rus_komtet_kassa.is_print_check'),
                 'vat' => Registry::get('addons.rus_komtet_kassa.default_vat'),
                 'shop_id' => Registry::get('addons.rus_komtet_kassa.shop_id'),

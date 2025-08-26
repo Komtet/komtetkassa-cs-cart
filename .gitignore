@@ -1,3 +1,7 @@
-/php/**
-/db/**
-komtetkassa-*.zip
+# OSX
+.DS_Store
+
+**/bin
+**/db
+**/php
+**/releases

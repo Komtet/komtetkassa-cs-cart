@@ -52,6 +52,10 @@ msgctxt "SettingsOptions::rus_komtet_kassa::payment_systems"
 msgid "Payment systems for fiscalization"
 msgstr "Способы оплаты, для которых производить фискализацию"
 
+msgctxt "SettingsOptions::rus_komtet_kassa::is_internet"
+msgid "Payment sign on the Internet"
+msgstr "Признак расчета в интернет"
+
 msgctxt "SettingsOptions::rus_komtet_kassa::is_print_check"
 msgid "Is check printing needed"
 msgstr "Печатать ли бумажный чек"

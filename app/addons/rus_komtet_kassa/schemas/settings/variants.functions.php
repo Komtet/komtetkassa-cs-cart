@@ -53,3 +53,11 @@ function fn_settings_variants_addons_rus_komtet_kassa_is_print_check()
         false => "Нет",
     );
 }
+
+function fn_settings_variants_addons_rus_komtet_kassa_is_internet()
+{
+    return array(
+        true => "Да",
+        false => "Нет",
+    );
+}

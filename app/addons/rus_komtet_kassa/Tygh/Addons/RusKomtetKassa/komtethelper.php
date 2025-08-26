@@ -43,6 +43,7 @@ class komtetHelper
 
         $check = new Check($order['order_id'], $user_contact, $method, intval($params['sno']));
         $check->setShouldPrint($params['is_print_check']);
+        $check->setInternet($params['is_internet']);
 
         $vat = new Vat($params['vat']);
 

@@ -3,6 +3,7 @@ services:
 
   cscart_mysql5.7:
     image: mysql:5.7
+    platform: linux/amd64
     container_name: cscart_mysql
     environment:
       MYSQL_ROOT_PASSWORD: my_secret_pw_shh
@@ -30,6 +31,7 @@ services:
 
   cscart_phpmyadmin:
     image: phpmyadmin
+    platform: linux/amd64
     restart: always
     ports:
       - 8101:80
