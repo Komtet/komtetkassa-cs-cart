@@ -12,8 +12,11 @@ help:
 version:  ## Версия проекта
 	@echo -e "${Red}Version:${Color_Off} $(VERSION)";
 
+build:  ## Собрать контейнер
+	@docker-compose build --no-cache
+
 start:  ## Запустить контейнер
-	@docker-compose up --build
+	@docker-compose up
 
 stop:  ## Остановить контейнер
 	@docker-compose down
