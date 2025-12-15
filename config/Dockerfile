@@ -1,4 +1,4 @@
-FROM php:7.4-apache
+FROM php:8.2-apache
 
 ENV VERSION_ONIG=6.9.3
 ENV ONIG_BUILD_DIR=/tmp/oniguruma
@@ -23,7 +23,7 @@ RUN set -xe; \
     curl -sL https://deb.nodesource.com/setup_18.x | bash -; \
     apt install -y nodejs; \
     docker-php-ext-configure gd --with-freetype=/usr/include/ --with-jpeg=/usr/include/; \
-    docker-php-ext-install pdo_mysql mysqli gd json zip intl soap mbstring exif bcmath curl sockets; \
+    docker-php-ext-install pdo_mysql mysqli gd zip intl soap mbstring exif bcmath curl sockets; \
     pecl install imagick; \
     docker-php-ext-enable imagick; \
     docker-php-ext-enable mysqli; \

@@ -15,11 +15,11 @@ services:
     ports:
       - "9907:3306"
 
-  cscart_php7.4:
+  cscart_php:
     build:
       context: ./config
       dockerfile: Dockerfile
-    container_name: cscart_php7.4
+    container_name: cscart_php
     volumes:
       - ./php:/var/www/html/
       - ./config/php-ini-overrides.ini:/usr/local/etc/php/conf.d/00-php.ini
