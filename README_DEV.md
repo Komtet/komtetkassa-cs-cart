@@ -14,10 +14,10 @@ make start
 
 4. Выполнить установку CMS, параметры подключения к БД указать
 ```sh
-    host: cscart_mysql,
-    user: devuser,
-    password: devpass,
-    db: cscart_db
+    Сервер MySQL: cscart_mysql,
+    База данных MySQL: cscart_db,
+    Пользователь MySQL: devuser,
+    Пароль MySQL: devpass,
 ```
 
 5. Установить и настроить плагин через инсталлер

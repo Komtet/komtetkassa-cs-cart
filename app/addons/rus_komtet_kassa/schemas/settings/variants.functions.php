@@ -1,5 +1,10 @@
 <?php
 
+function fn_settings_variants_addons_rus_komtet_kassa_statuses_prepaid()
+{
+    return fn_get_simple_statuses(STATUSES_ORDER);
+}
+
 function fn_settings_variants_addons_rus_komtet_kassa_statuses_paid()
 {
     return fn_get_simple_statuses(STATUSES_ORDER);

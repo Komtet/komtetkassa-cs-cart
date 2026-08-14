@@ -20,6 +20,10 @@ msgctxt "Addons::description::rus_komtet_kassa"
 msgid ""
 msgstr "Интеграция с сервисом онлайн-касс КОМТЕТ Касса"
 
+msgctxt "SettingsOptions::rus_komtet_kassa::statuses_prepaid"
+msgid "Statuses for pre-paid orders (not required)"
+msgstr "Статусы предоплаченных заказов (не обязательно)"
+
 msgctxt "SettingsOptions::rus_komtet_kassa::statuses_paid"
 msgid "Statuses for paid orders"
 msgstr "Статусы оплаченных заказов"
