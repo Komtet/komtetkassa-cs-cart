@@ -127,7 +127,6 @@ function fn_rus_komtet_kassa_change_order_status($status_to, $status_from, $orde
 
         $is_order_was_returned = in_array($status_from, $statuses_refund, true);
         $is_order_was_prepaid = in_array($status_from, $statuses_prepaid, true);
-        $is_order_was_paid = in_array($status_from, $statuses_paid, true);
         $is_order_will_be_returned = in_array($status_to, $statuses_refund, true);
         $is_order_will_be_prepaid = in_array($status_to, $statuses_prepaid, true);
         $is_order_will_be_paid = in_array($status_to, $statuses_paid, true);
@@ -154,8 +153,11 @@ function fn_rus_komtet_kassa_change_order_status($status_to, $status_from, $orde
         // )
         // ЛИБО
         // (
-        //  заказ был фискализирован И ((он был возвращен И (делается оплата ИЛИ делается предоплата)) ЛИБО
-        //                               делается возврат)
+        //  заказ был фискализирован И (
+        //      (он был предоплечен И делается оплата) ЛИБО
+        //      (он был возвращен И (делается оплата ИЛИ делается предоплата)) ЛИБО
+        //      делается возврат
+        //  )
         // )
 
         if (
@@ -168,12 +170,14 @@ function fn_rus_komtet_kassa_change_order_status($status_to, $status_from, $orde
             )
             ||
             (
-                $is_order_was_fiscalized && (($is_order_was_returned && ($is_order_will_be_paid || $is_order_will_be_prepaid)) ||
-                                              $is_order_will_be_returned)
+                $is_order_was_fiscalized && (
+                     ($is_order_was_prepaid && $is_order_will_be_paid) ||
+                     ($is_order_was_returned && ($is_order_will_be_paid || $is_order_will_be_prepaid)) ||
+                     $is_order_will_be_returned
+                    )
             )
         )
         {
-
             $order = [
                 'email' => $order_info['email'],
                 'phone' => $order_info['phone'],

@@ -45,11 +45,7 @@ class komtetHelper
                 );
             }
             // Пробивается полная оплата
-            else if (in_array($orderStatusTo, $statusesPaid) &&
-                     ($orderStatusFrom == CalculationMethod::PRE_PAYMENT_FULL ||
-                      $orderStatusFrom == CalculationMethod::PRE_PAYMENT_FULL.":done" ||
-                      $orderStatusFrom == CalculationMethod::FULL_PAYMENT.":error")
-                ) {
+            else if (in_array($orderStatusTo, $statusesPaid)) {
                 return array(
                     'calculation_method' => CalculationMethod::FULL_PAYMENT,
                     'is_full_payment' => true
@@ -112,7 +108,7 @@ class komtetHelper
             $user_contact = mb_eregi_replace("[^0-9+]", '', $order['phone']);
         }
 
-        $intent = $is_order_will_be_returned ? Check::INTENT_SELL_RETURN : Check::INTENT_SELL;
+        $intent = $params['is_order_will_be_returned'] ? Check::INTENT_SELL_RETURN : Check::INTENT_SELL;
 
         $check = new Check($order['order_id'], $user_contact, $intent, intval($params['sno']));
         $check->setShouldPrint($params['is_print_check']);
