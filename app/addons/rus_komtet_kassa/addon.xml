@@ -18,6 +18,9 @@
         <sections>
             <section id="general">
                 <items>
+                    <item id="statuses_prepaid">
+                        <type>multiple select</type>
+                    </item>
                     <item id="statuses_paid">
                         <type>multiple select</type>
                     </item>

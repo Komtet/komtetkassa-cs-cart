@@ -107,6 +107,14 @@ function fn_rus_komtet_kassa_change_order_status($status_to, $status_from, $orde
     $payment_ids = array_keys(Registry::get('addons.rus_komtet_kassa.payment_systems'));
     if(in_array(intval($order_info['payment_id']), $payment_ids, true)){
 
+        $statuses_prepaid_option = Registry::get('addons.rus_komtet_kassa.statuses_prepaid');
+        if (!empty($statuses_prepaid_option) && is_array($statuses_prepaid_option)) {
+            $statuses_prepaid = array_keys($statuses_prepaid_option);
+        }
+        else {
+            $statuses_prepaid = [];
+        }
+
         $statuses_paid = array_keys(Registry::get('addons.rus_komtet_kassa.statuses_paid'));
         $statuses_refund = array_keys(Registry::get('addons.rus_komtet_kassa.statuses_refund'));
 
@@ -118,8 +126,9 @@ function fn_rus_komtet_kassa_change_order_status($status_to, $status_from, $orde
         );
 
         $is_order_was_returned = in_array($status_from, $statuses_refund, true);
-        $is_order_was_paid = in_array($status_from, $statuses_paid, true);
+        $is_order_was_prepaid = in_array($status_from, $statuses_prepaid, true);
         $is_order_will_be_returned = in_array($status_to, $statuses_refund, true);
+        $is_order_will_be_prepaid = in_array($status_to, $statuses_prepaid, true);
         $is_order_will_be_paid = in_array($status_to, $statuses_paid, true);
 
         # последний статус
@@ -138,25 +147,35 @@ function fn_rus_komtet_kassa_change_order_status($status_to, $status_from, $orde
 
         // если
         // (
-        //  (заказ ещё не фискализирован И делается оплата)
+        //  (заказ ещё не фискализирован И (делается оплата ИЛИ делается предоплата))
         //   ЛИБО
         //  (была ошибка фискализации И делается оплата/возврат)
         // )
         // ЛИБО
         // (
-        //  заказ был фискализирован И ((он был возвращен И делается оплата) ЛИБО
-        //                               делается возврат)
+        //  заказ был фискализирован И (
+        //      (он был предоплечен И делается оплата) ЛИБО
+        //      (он был возвращен И (делается оплата ИЛИ делается предоплата)) ЛИБО
+        //      делается возврат
+        //  )
         // )
 
         if (
             (
-             (!$is_order_was_fiscalized && $is_order_will_be_paid) ||
+             (!$is_order_was_fiscalized && ($is_order_will_be_paid || $is_order_will_be_prepaid))
+              ||
              ($fisc_status == 'error' &&
               ($is_order_will_be_paid || $is_order_will_be_returned)
              )
-            ) ||
-            ($is_order_was_fiscalized && (($is_order_was_returned && $is_order_will_be_paid) ||
-                                           $is_order_will_be_returned))
+            )
+            ||
+            (
+                $is_order_was_fiscalized && (
+                     ($is_order_was_prepaid && $is_order_will_be_paid) ||
+                     ($is_order_was_returned && ($is_order_will_be_paid || $is_order_will_be_prepaid)) ||
+                     $is_order_will_be_returned
+                    )
+            )
         )
         {
             $order = [
@@ -168,6 +187,17 @@ function fn_rus_komtet_kassa_change_order_status($status_to, $status_from, $orde
                 'shipping_cost' => $order_info['shipping_cost']
             ];
 
+            $statuses_prepaid = Registry::get('addons.rus_komtet_kassa.statuses_prepaid');
+            $statuses_paid = Registry::get('addons.rus_komtet_kassa.statuses_paid');
+            $statuses_refund = Registry::get('addons.rus_komtet_kassa.statuses_refund');
+
+            $payment_props = komtetHelper::getPaymentProps(
+                $status_to,
+                $status_from,
+                $statuses_prepaid,
+                $statuses_paid
+            );
+
             $params = [
                 'sno' => Registry::get('addons.rus_komtet_kassa.default_sno'),
                 'is_internet' => Registry::get('addons.rus_komtet_kassa.is_internet'),
@@ -176,11 +206,15 @@ function fn_rus_komtet_kassa_change_order_status($status_to, $status_from, $orde
                 'shop_id' => Registry::get('addons.rus_komtet_kassa.shop_id'),
                 'secret' => Registry::get('addons.rus_komtet_kassa.shop_secret'),
                 'queue_id' => Registry::get('addons.rus_komtet_kassa.queue_id'),
-                'statuses_paid' => Registry::get('addons.rus_komtet_kassa.statuses_paid'),
-                'statuses_refund' => Registry::get('addons.rus_komtet_kassa.statuses_refund')
+                'statuses_prepaid' => $statuses_prepaid,
+                'statuses_paid' => $statuses_paid,
+                'statuses_refund' => $statuses_refund,
+                'is_order_will_be_returned' => $is_order_will_be_returned
             ];
 
-            komtetHelper::fiscalize($order, $params, $is_order_will_be_returned);
+            $params += $payment_props;
+
+            komtetHelper::fiscalize($order, $params);
         }
     }
 }

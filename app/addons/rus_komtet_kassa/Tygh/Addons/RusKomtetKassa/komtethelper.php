@@ -3,6 +3,7 @@
 use Komtet\KassaSdk\v1\Check;
 use Komtet\KassaSdk\v1\Position;
 use Komtet\KassaSdk\v1\Vat;
+use Komtet\KassaSdk\v1\CalculationMethod;
 use Komtet\KassaSdk\v1\Client;
 use Komtet\KassaSdk\v1\QueueManager;
 use Komtet\KassaSdk\v1\Payment;
@@ -13,7 +14,75 @@ use Komtet\KassaSdk\Exception\ApiValidationException;
 
 class komtetHelper
 {
-    public static function fiscalize($order, $params, $is_refund)
+
+    public static function getPaymentProps($orderStatusTo, $orderStatusFrom, $statusesPrepaid, $statusesPaid)
+    {
+        /**
+         * Получение опций оплаты
+         * @param string $orderStatusTo новый статус заказа
+         * @param string $orderStatusFrom предыдущий статус заказа
+         * @param array $statusesPrepaid статусы предоплаты из настроек
+         * @param array $statusesPaid статусы оплаты из настроек
+         */
+
+        include_once __DIR__.'/kassa/src/v1/CalculationMethod.php';
+        include_once __DIR__.'/kassa/src/v1/Vat.php';
+
+        // Плагин настроен на 1 чек
+        if (empty($statusesPrepaid) && array_key_exists($orderStatusTo, $statusesPaid)) {
+            return array(
+                'calculation_method' => CalculationMethod::FULL_PAYMENT,
+                'is_full_payment' => false
+            );
+        }
+        // Плагин настроен на 2 чека
+        else if (!empty($statusesPrepaid)) {
+            // Пробивается предоплата
+            if (array_key_exists($orderStatusTo, $statusesPrepaid)) {
+                return array(
+                    'calculation_method' => CalculationMethod::PRE_PAYMENT_FULL,
+                    'is_full_payment' => false
+                );
+            }
+            // Пробивается полная оплата
+            else if (array_key_exists($orderStatusTo, $statusesPaid)) {
+                return array(
+                    'calculation_method' => CalculationMethod::FULL_PAYMENT,
+                    'is_full_payment' => true
+                );
+            }
+        }
+
+        return array(
+            'calculation_method' => null,
+            'is_full_payment' => null
+        );
+    }
+
+    private static function getVatForCalculationMethod($vat, $calculationMethod) {
+        include_once __DIR__.'/kassa/src/v1/CalculationMethod.php';
+        include_once __DIR__.'/kassa/src/v1/Vat.php';
+
+        if ($calculationMethod === CalculationMethod::PRE_PAYMENT_FULL) {
+            switch ($vat) {
+                case Vat::RATE_0:
+                    return Vat::RATE_0;
+                case Vat::RATE_5:
+                    return Vat::RATE_105;
+                case Vat::RATE_7:
+                    return Vat::RATE_107;
+                case Vat::RATE_10:
+                    return Vat::RATE_110;
+                case Vat::RATE_20:
+                    return Vat::RATE_120;
+                case Vat::RATE_22:
+                    return Vat::RATE_122;
+            }
+        }
+        return $vat;
+    }
+
+    public static function fiscalize($order, $params)
     {
 
         include_once __DIR__.'/kassa/src/v1/Check.php';
@@ -24,6 +93,7 @@ class komtetHelper
         include_once __DIR__.'/kassa/src/v1/Payment.php';
         include_once __DIR__.'/kassa/src/v1/Exception/SdkException.php';
         include_once __DIR__.'/kassa/src/v1/Exception/ClientException.php';
+        include_once __DIR__.'/kassa/src/v1/Exception/ApiValidationException.php';
 
         $data = array (
             'order_id' => $order['order_id'],
@@ -33,19 +103,20 @@ class komtetHelper
 
         $positions = $order['positions'];
 
-        $method = $is_refund ? Check::INTENT_SELL_RETURN : Check::INTENT_SELL;
-
         if ($order['email']) {
             $user_contact = $order['email'];
         } else {
             $user_contact = mb_eregi_replace("[^0-9+]", '', $order['phone']);
         }
 
-        $check = new Check($order['order_id'], $user_contact, $method, intval($params['sno']));
+        $intent = $params['is_order_will_be_returned'] ? Check::INTENT_SELL_RETURN : Check::INTENT_SELL;
+
+        $check = new Check($order['order_id'], $user_contact, $intent, intval($params['sno']));
         $check->setShouldPrint($params['is_print_check']);
         $check->setInternet($params['is_internet']);
 
         $vat = new Vat($params['vat']);
+        $vat = self::getVatForCalculationMethod($vat, $params['calculation_method']);
 
         $total = 0.0;
 
@@ -59,6 +130,8 @@ class komtetHelper
                                         floatval($position['amount']),
                                         $positionTotal,
                                         $vat);
+
+            $positionObj->setCalculationMethod($params['calculation_method']);
 
             $check->addPosition($positionObj);
         }
@@ -76,6 +149,9 @@ class komtetHelper
                                              1,
                                              round($order['shipping_cost'], 2),
                                              $vat);
+
+            $shippingPosition->setCalculationMethod($params['calculation_method']);
+
             $check->addPosition($shippingPosition);
         }
 
