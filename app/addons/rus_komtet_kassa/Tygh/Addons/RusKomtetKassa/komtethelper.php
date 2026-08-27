@@ -29,7 +29,7 @@ class komtetHelper
         include_once __DIR__.'/kassa/src/v1/Vat.php';
 
         // Плагин настроен на 1 чек
-        if (empty($statusesPrepaid) && in_array($orderStatusTo, $statusesPaid)) {
+        if (empty($statusesPrepaid) && array_key_exists($orderStatusTo, $statusesPaid)) {
             return array(
                 'calculation_method' => CalculationMethod::FULL_PAYMENT,
                 'is_full_payment' => false
@@ -38,14 +38,14 @@ class komtetHelper
         // Плагин настроен на 2 чека
         else if (!empty($statusesPrepaid)) {
             // Пробивается предоплата
-            if (in_array($orderStatusTo, $statusesPrepaid)) {
+            if (array_key_exists($orderStatusTo, $statusesPrepaid)) {
                 return array(
                     'calculation_method' => CalculationMethod::PRE_PAYMENT_FULL,
                     'is_full_payment' => false
                 );
             }
             // Пробивается полная оплата
-            else if (in_array($orderStatusTo, $statusesPaid)) {
+            else if (array_key_exists($orderStatusTo, $statusesPaid)) {
                 return array(
                     'calculation_method' => CalculationMethod::FULL_PAYMENT,
                     'is_full_payment' => true
@@ -93,6 +93,7 @@ class komtetHelper
         include_once __DIR__.'/kassa/src/v1/Payment.php';
         include_once __DIR__.'/kassa/src/v1/Exception/SdkException.php';
         include_once __DIR__.'/kassa/src/v1/Exception/ClientException.php';
+        include_once __DIR__.'/kassa/src/v1/Exception/ApiValidationException.php';
 
         $data = array (
             'order_id' => $order['order_id'],
