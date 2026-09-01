@@ -4,6 +4,7 @@ use Komtet\KassaSdk\v1\Check;
 use Komtet\KassaSdk\v1\Position;
 use Komtet\KassaSdk\v1\Vat;
 use Komtet\KassaSdk\v1\CalculationMethod;
+use Komtet\KassaSdk\v1\CalculationSubject;
 use Komtet\KassaSdk\v1\Client;
 use Komtet\KassaSdk\v1\QueueManager;
 use Komtet\KassaSdk\v1\Payment;
@@ -26,12 +27,14 @@ class komtetHelper
          */
 
         include_once __DIR__.'/kassa/src/v1/CalculationMethod.php';
+        include_once __DIR__.'/kassa/src/v1/CalculationSubject.php';
         include_once __DIR__.'/kassa/src/v1/Vat.php';
 
         // Плагин настроен на 1 чек
         if (empty($statusesPrepaid) && array_key_exists($orderStatusTo, $statusesPaid)) {
             return array(
                 'calculation_method' => CalculationMethod::FULL_PAYMENT,
+                'calculation_subject' => CalculationSubject::PRODUCT,
                 'is_full_payment' => false
             );
         }
@@ -41,6 +44,7 @@ class komtetHelper
             if (array_key_exists($orderStatusTo, $statusesPrepaid)) {
                 return array(
                     'calculation_method' => CalculationMethod::PRE_PAYMENT_FULL,
+                    'calculation_subject' => CalculationSubject::PAYMENT,
                     'is_full_payment' => false
                 );
             }
@@ -48,6 +52,7 @@ class komtetHelper
             else if (array_key_exists($orderStatusTo, $statusesPaid)) {
                 return array(
                     'calculation_method' => CalculationMethod::FULL_PAYMENT,
+                    'calculation_subject' => CalculationSubject::PRODUCT,
                     'is_full_payment' => true
                 );
             }
@@ -89,6 +94,7 @@ class komtetHelper
         include_once __DIR__.'/kassa/src/v1/Position.php';
         include_once __DIR__.'/kassa/src/v1/Vat.php';
         include_once __DIR__.'/kassa/src/v1/Client.php';
+        include_once __DIR__.'/kassa/src/v1/CalculationSubject.php';
         include_once __DIR__.'/kassa/src/v1/QueueManager.php';
         include_once __DIR__.'/kassa/src/v1/Payment.php';
         include_once __DIR__.'/kassa/src/v1/Exception/SdkException.php';
@@ -115,8 +121,8 @@ class komtetHelper
         $check->setShouldPrint($params['is_print_check']);
         $check->setInternet($params['is_internet']);
 
-        $vat = new Vat($params['vat']);
-        $vat = self::getVatForCalculationMethod($vat, $params['calculation_method']);
+        $vat = self::getVatForCalculationMethod($params['vat'], $params['calculation_method']);
+        $vat = new Vat($vat);
 
         $total = 0.0;
 
@@ -132,6 +138,7 @@ class komtetHelper
                                         $vat);
 
             $positionObj->setCalculationMethod($params['calculation_method']);
+            $positionObj->setCalculationSubject($params['calculation_subject']);
 
             $check->addPosition($positionObj);
         }
@@ -151,6 +158,7 @@ class komtetHelper
                                              $vat);
 
             $shippingPosition->setCalculationMethod($params['calculation_method']);
+            $shippingPosition->setCalculationSubject(CalculationSubject::SERVICE);
 
             $check->addPosition($shippingPosition);
         }
